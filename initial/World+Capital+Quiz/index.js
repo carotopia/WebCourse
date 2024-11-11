@@ -1,14 +1,33 @@
 import express from "express";
 import bodyParser from "body-parser";
+import pg from "pg";
 
 const app = express();
 const port = 3000;
 
-let quiz = [
-  { country: "France", capital: "Paris" },
-  { country: "United Kingdom", capital: "London" },
-  { country: "United States of America", capital: "New York" },
-];
+
+const db = new pg.Client({
+  user: "postgres",
+  host: "localhost",
+  database: "World",
+  password: "1234",
+  port: 5432,
+
+});
+
+
+db.connect();
+
+db.query("SELECT * FROM capitals", (err, res) => {
+  if (err) {
+    console.error("Error executing query", err.stack);
+  } else {
+    quiz = res.rows;
+  }
+  db.end();
+});
+let quiz = [];
+
 
 let totalCorrect = 0;
 
@@ -35,6 +54,7 @@ app.post("/submit", (req, res) => {
     console.log(totalCorrect);
     isCorrect = true;
   }
+
 
   nextQuestion();
   res.render("index.ejs", {
